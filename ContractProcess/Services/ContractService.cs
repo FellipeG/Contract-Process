@@ -6,22 +6,21 @@ namespace ContractProcess.Services
     class ContractService
     {
         private ITaxService _taxService;
-        private int _installmentsNumber;
 
-        public ContractService(ITaxService taxService, int installmentsNumber)
+        public ContractService(ITaxService taxService)
         {
             _taxService = taxService;
-            _installmentsNumber = installmentsNumber;
         }
 
-        public void AddInstallment(Contract contract)
+        public void ProcessContract(Contract contract, int months)
         {
-            DateTime date = contract.Date;
-            double[] installmentsValue = _taxService.Tax(contract.Value, _installmentsNumber);
-            foreach (double monthValue in installmentsValue)
+            double basicQuota = contract.Value / months;
+            for(int i=1; i<=months; i++)
             {
-                date = date.AddMonths(1);
-                contract.AddInstallment(new Installment(date, monthValue));
+                DateTime date = contract.Date.AddMonths(i);
+                double updatedQuota = basicQuota + _taxService.Interest(basicQuota, i);
+                double fullQuota = updatedQuota + _taxService.PaymentFee(updatedQuota);
+                contract.AddInstallment(new Installment(date, fullQuota));
             }
         }
     }

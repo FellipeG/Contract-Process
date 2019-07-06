@@ -2,6 +2,7 @@
 {
     interface ITaxService
     {
-        double[] Tax(double value, int installments);
+        double PaymentFee(double amount);
+        double Interest(double amount, int months);
     }
 }
